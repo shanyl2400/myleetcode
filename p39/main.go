@@ -2,6 +2,30 @@ package main
 
 import "fmt"
 
+func combinationSum2(candidates []int, target int) [][]int {
+	res := make([][]int, 0)
+	dfs(candidates, target, &res, []int{}, 0)
+	return res
+}
+
+func dfs(candidates []int, target int, res *[][]int, currentList []int, idx int) {
+	if idx >= len(candidates) {
+		return
+	}
+	if target == 0 {
+		list := make([]int, len(currentList))
+		copy(list, currentList)
+		*res = append(*res, list)
+		return
+	}
+	dfs(candidates, target, res, currentList, idx+1)
+
+	if candidates[idx] <= target {
+		currentList = append(currentList, candidates[idx])
+		dfs(candidates, target-candidates[idx], res, currentList, idx)
+		currentList = currentList[:len(currentList)-1]
+	}
+}
 func combinationSum(candidates []int, target int) [][]int {
 	state := make([][][]int, target+1)
 	for i := range candidates {
@@ -34,13 +58,9 @@ func main() {
 		2, 7, 6, 3, 5, 1,
 		// 1,
 	}
-	ret := combinationSum(candidates, 9)
+	ret := combinationSum2(candidates, 9)
 	// for i := range ret {
 	// 	fmt.Println(ret[i])
 	// }
 	fmt.Println(ret)
 }
-
-// [2,2,2,3]
-
-// [2 2 2 1]
