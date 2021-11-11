@@ -14,102 +14,78 @@ type ListNode struct {
 	Next *ListNode
 }
 
-func swap(x, y, prevX, prevY *ListNode, begin **ListNode) {
-	// fmt.Println("swap:", x, y, x.Next, y.Next)
-	if x == y {
-		return
-	}
-	if x == *begin {
-		*begin = y
-	} else if y == *begin {
-		*begin = x
-	}
-	if prevX != nil {
-		prevX.Next = y
-	}
-	if prevY != nil {
-		prevY.Next = x
-	}
-	tmp := x.Next
-	x.Next = y.Next
-	y.Next = tmp
-	// tmp := x.Val
-	// x.Val = y.Val
-	// y.Val = tmp
-	// fmt.Println("aft swap:", y, x, x.Next, y.Next)
-
-}
-
-func quickSortOnce(begin *ListNode, end *ListNode, cnt int, name string) *ListNode {
-	if begin == nil || end == nil || begin == end {
+func sortList(head *ListNode) *ListNode {
+	if head == nil {
 		return nil
 	}
 
-	var prevFast *ListNode
-	var prevSlow *ListNode
-	alreadyPrevFast := false
-	alreadyPrevSlow := false
-	fast := begin
-	slow := begin
-	leftCount := 1
-	for fast != end {
-		if fast.Val < end.Val {
-			beforeBegin := begin
-			fmt.Println("before slow:", slow, "fast:", fast, "prevSlow:", prevSlow, "prevFast:", prevFast)
-			swap(slow, fast, prevSlow, prevFast, &begin)
-			tmp := fast
-			fast = slow
-			slow = tmp
-			fmt.Println("aft slow:", slow, "fast:", fast, "prevSlow:", prevSlow, "prevFast:", prevFast)
-			if beforeBegin != begin {
-				if prevFast == beforeBegin && !alreadyPrevFast {
-					prevFast = begin
-				}
-				if prevSlow == beforeBegin && !alreadyPrevSlow {
-					prevSlow = begin
-				}
+	//计算node数量
+	cnt := 0
+	cur := head
+	for cur != nil {
+		cnt++
+		cur = cur.Next
+	}
+	dummyHead := &ListNode{Next: head}
+	for subLen := 1; subLen < cnt; subLen <<= 1 {
+		prev, cur := dummyHead, dummyHead.Next
+		for cur != nil {
+			head1 := cur
+			for j := 1; j < subLen && cur.Next != nil; j++ {
+				cur = cur.Next
 			}
 
-			fmt.Println("switch >>>", fast, slow, fast.Next, slow.Next, prevFast, prevSlow)
-
-			slow = slow.Next
-			if prevSlow == nil {
-				prevSlow = begin
-			} else {
-				alreadyPrevSlow = true
-				prevSlow = prevSlow.Next
+			head2 := cur.Next
+			cur.Next = nil
+			cur = head2
+			for j := 1; j < subLen && cur != nil && cur.Next != nil; j++ {
+				cur = cur.Next
 			}
-			fmt.Println("next>>>>>>", fast, slow, fast.Next, slow.Next, prevFast, prevSlow)
-			leftCount++
+
+			var next *ListNode
+			if cur != nil {
+				next = cur.Next
+				cur.Next = nil
+			}
+			fmt.Println(head1, head2)
+
+			prev.Next = merge(head1, head2)
+			for prev.Next != nil {
+				prev = prev.Next
+			}
+			cur = next
 		}
-		fast = fast.Next
-		if prevFast == nil {
-			prevFast = begin
-		} else {
-			alreadyPrevFast = true
-			prevFast = prevFast.Next
-		}
-		fmt.Println("2222next>>>>>>", fast, slow, fast.Next, slow.Next, prevFast, prevSlow)
 	}
-	swap(slow, end, prevSlow, prevFast, &begin)
-	if slow != begin {
-		quickSortOnce(begin, prevSlow, leftCount, "left")
-	}
-	if slow != end {
-		quickSortOnce(slow.Next, end, cnt-leftCount-1, "right")
-	}
-	return begin
+	return dummyHead.Next
 }
 
-func sortList(head *ListNode) *ListNode {
-	pt := head
-	cnt := 0
-	for pt.Next != nil {
-		pt = pt.Next
-		cnt++
+func merge(f, s *ListNode) *ListNode {
+	dummyHead := &ListNode{}
+	fs := f
+	ss := s
+
+	cur := dummyHead
+	for fs != nil && ss != nil {
+		if fs.Val > ss.Val {
+			cur.Next = ss
+			ss = ss.Next
+		} else {
+			cur.Next = fs
+			fs = fs.Next
+		}
+		cur = cur.Next
 	}
-	ret := quickSortOnce(head, pt, cnt, "mid")
-	return ret
+
+	//f未结束
+	if fs != nil {
+		cur.Next = fs
+	}
+	//s未结束
+	if ss != nil {
+		cur.Next = ss
+	}
+	// cur.Next = nil
+	return dummyHead.Next
 }
 
 func link1() *ListNode {
@@ -155,11 +131,11 @@ func link2() *ListNode {
 }
 
 func link3() *ListNode {
-	node4 := &ListNode{
-		Val: 4,
-	}
 	node2 := &ListNode{
 		Val: 2,
+	}
+	node4 := &ListNode{
+		Val: 4,
 	}
 	node1 := &ListNode{
 		Val: 1,
@@ -184,13 +160,23 @@ func printLink(root, end *ListNode) {
 	fmt.Println()
 }
 
+func arrayToLink(a []int) *ListNode {
+	root := &ListNode{Val: a[0]}
+	cur := root
+	for i := range a[1:] {
+		cur.Next = &ListNode{
+			Val: a[i+1],
+		}
+		cur = cur.Next
+	}
+	return root
+}
+
 func main() {
-	root := link1()
-	ret := sortList(root)
-	printLink(ret, nil)
-	// printLink(root, nil)
-	// node4 := root.Next
-	// node1 := node4.Next
-	// swap(node4, node1, root, node4, &root)
-	// printLink(root, nil)
+	// root := arrayToLink([]int{4, 1, 3, 2, 8, 5, 10, 6})
+	root := arrayToLink([]int{-1, 5, 3, 4, 0})
+	printLink(root, nil)
+	head := sortList(root)
+
+	printLink(head, nil)
 }
