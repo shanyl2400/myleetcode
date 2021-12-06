@@ -16,6 +16,24 @@ type TreeNode struct {
 	Right *TreeNode
 }
 
+func pathSum(root *TreeNode, targetSum int) int {
+	preSum := map[int]int{0: 1}
+	ans := 0
+	var dfs func(*TreeNode, int)
+	dfs = func(root *TreeNode, cur int) {
+		if root == nil {
+			return
+		}
+		cur += root.Val
+		ans += preSum[cur-targetSum]
+		preSum[cur]++
+		dfs(root.Left, cur)
+		dfs(root.Right, cur)
+		preSum[cur]--
+	}
+	dfs(root, 0)
+	return ans
+}
 func calcPathSum(root *TreeNode, targetSum int) int {
 	if root == nil {
 		return 0
@@ -29,13 +47,13 @@ func calcPathSum(root *TreeNode, targetSum int) int {
 	return ret
 }
 
-func pathSum(root *TreeNode, targetSum int) int {
+func pathSum2(root *TreeNode, targetSum int) int {
 	if root == nil {
 		return 0
 	}
 	ret := calcPathSum(root, targetSum)
-	ret += pathSum(root.Left, targetSum)
-	ret += pathSum(root.Right, targetSum)
+	ret += pathSum2(root.Left, targetSum)
+	ret += pathSum2(root.Right, targetSum)
 	return ret
 }
 
@@ -100,7 +118,7 @@ func tree2() *TreeNode {
 func main() {
 	// root := tree1()
 	// target := 22
-	root := tree2()
-	target := 3
+	root := tree0()
+	target := 8
 	fmt.Println(pathSum(root, target))
 }
