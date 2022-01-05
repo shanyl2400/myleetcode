@@ -67,10 +67,10 @@ func dfs(graph [][]int, visited []bool, start, target int, idx int) int {
 }
 
 func main() {
-	begin := "hit"
-	end := "coz"
+	begin := "hot"
+	end := "dog"
 	wordList := []string{
-		"hot", "dot", "dog", "lot", "log", "cog", "coz",
+		"hot", "dog",
 		// "hot", "dot", "dog", "lot", "log",
 	}
 	fmt.Println(ladderLength(begin, end, wordList))
