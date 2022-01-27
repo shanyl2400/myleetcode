@@ -1,31 +1,68 @@
 package main
 
-import "fmt"
+import (
+	"container/heap"
+	"fmt"
+	"sort"
+)
+
+type node struct {
+	end    int
+	height int
+}
+
+type nodeList []node
+
+func (n nodeList) Len() int {
+	return len(n)
+}
+func (n nodeList) Less(i, j int) bool {
+	return n[i].height > n[j].height
+}
+func (n nodeList) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+}
+func (n *nodeList) Push(v interface{}) {
+	*n = append(*n, v.(node))
+}
+func (n *nodeList) Pop() interface{} {
+	a := *n
+	v := a[len(a)-1]
+	*n = a[:len(a)-1]
+	return v
+}
 
 func getSkyline(buildings [][]int) [][]int {
-	max := 0
+	size := len(buildings)
+	boundaries := make([]int, 0, size*2)
 	for i := range buildings {
-		if max < buildings[i][1] {
-			max = buildings[i][1]
-		}
+		boundaries = append(boundaries, buildings[i][0], buildings[i][1])
 	}
-	arr := make([]int, max+1)
+	sort.Ints(boundaries)
 
-	for i := range buildings {
-		for j := buildings[i][0]; j < buildings[i][1]; j++ {
-			if arr[j] < buildings[i][2] {
-				arr[j] = buildings[i][2]
-			}
-		}
-	}
-	prev := 0
+	idx := 0
+	h := nodeList{}
 	ans := make([][]int, 0)
-	for i := range arr {
-		if arr[i] != prev {
-			ans = append(ans, []int{
-				i, arr[i],
+	for _, boundary := range boundaries {
+		for idx < size && buildings[idx][0] <= boundary {
+			//building is in boundary
+			heap.Push(&h, node{
+				end:    buildings[idx][1],
+				height: buildings[idx][2],
 			})
-			prev = arr[i]
+			idx++
+		}
+
+		//pop all out of range
+		for len(h) > 0 && h[0].end <= boundary {
+			heap.Pop(&h)
+		}
+		max := 0
+		if len(h) > 0 {
+			max = h[0].height
+		}
+		if len(ans) == 0 || max != ans[len(ans)-1][1] {
+			ans = append(ans, []int{boundary, max})
 		}
 	}
 	return ans
